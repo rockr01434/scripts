@@ -113,3 +113,4 @@ printf "Your File Manager pass: admin\n\n\n"
 
 echo "Server Rebooting..."
 sudo reboot
+

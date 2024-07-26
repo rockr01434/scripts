@@ -7,8 +7,8 @@ echo "Installing EPEL repository..."
 sudo dnf install epel-release -y
 
 # Install unzip
-echo "Installing unzip wget..."
-sudo dnf install unzip wget -y
+echo "Installing unzip wget nano..."
+sudo dnf install unzip wget nano -y
 
 
 # Install Apache

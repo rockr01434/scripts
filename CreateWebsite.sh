@@ -1,21 +1,19 @@
 #!/bin/bash
 
-# Ensure exactly two arguments are provided
-if [ "$#" -ne 2 ]; then
-	echo "Usage: $0 <domain> --ssl <yes|no>"
-	exit 1
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <domain> --ssl <yes|no>"
+    exit 1
 fi
 
 DOMAIN=$1
 SSL_FLAG=$2
+SSL_ENABLED=$3
 
 # Check if the second argument is --ssl and the third argument is either yes or no
-if [ "$SSL_FLAG" != "--ssl yes" ] && [ "$SSL_FLAG" != "--ssl no" ]; then
-	echo "Usage: $0 <domain> --ssl <yes|no>"
-	exit 1
+if [ "$SSL_FLAG" != "--ssl" ] || { [ "$SSL_ENABLED" != "yes" ] && [ "$SSL_ENABLED" != "no" ]; }; then
+    echo "Usage: $0 <domain> --ssl <yes|no>"
+    exit 1
 fi
-
-SSL_ENABLED=${SSL_FLAG#--ssl }
 
 DOMAIN_BASE=$(echo "$DOMAIN" | cut -d. -f1)
 DOC_ROOT="/home/$DOMAIN_BASE/public_html"
@@ -28,10 +26,10 @@ PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 # Create a system user for the domain without creating a home directory
 USER=$DOMAIN_BASE
 if id "$USER" &>/dev/null; then
-	# User exists
-	:
+    # User exists
+    :
 else
-	useradd -r -s /sbin/nologin --no-create-home $USER
+    useradd -r -s /sbin/nologin --no-create-home $USER
 fi
 
 # Create the document root
@@ -47,12 +45,12 @@ chcon -R -t httpd_sys_rw_content_t $DOC_ROOT
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
 <html>
-	<head>
-		<title>Welcome to $DOMAIN!</title>
-	</head>
-	<body>
-		<h1>Success! The $DOMAIN virtual host is working!</h1>
-	</body>
+    <head>
+        <title>Welcome to $DOMAIN!</title>
+    </head>
+    <body>
+        <h1>Success! The $DOMAIN virtual host is working!</h1>
+    </body>
 </html>
 EOL
 
@@ -79,21 +77,21 @@ systemctl restart php-fpm
 # Create the HTTP virtual host configuration file
 cat <<EOL > "$HTTP_CONFIG_FILE"
 <VirtualHost *:80>
-	ServerAdmin webmaster@$DOMAIN
-	ServerName $DOMAIN
-	ServerAlias www.$DOMAIN *.$DOMAIN
-	DocumentRoot $DOC_ROOT
-	ErrorLog $LOG_DIR/error.log
-	CustomLog $LOG_DIR/access.log combined
+    ServerAdmin webmaster@$DOMAIN
+    ServerName $DOMAIN
+    ServerAlias www.$DOMAIN *.$DOMAIN
+    DocumentRoot $DOC_ROOT
+    ErrorLog $LOG_DIR/error.log
+    CustomLog $LOG_DIR/access.log combined
 
-	<FilesMatch \.php$>
-		SetHandler "proxy:unix:/run/php-fpm/$DOMAIN_BASE.sock|fcgi://localhost"
-	</FilesMatch>
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php-fpm/$DOMAIN_BASE.sock|fcgi://localhost"
+    </FilesMatch>
 
-	<Directory "$DOC_ROOT">
-		AllowOverride None
-		Require all granted
-	</Directory>
+    <Directory "$DOC_ROOT">
+        AllowOverride None
+        Require all granted
+    </Directory>
 </VirtualHost>
 EOL
 
@@ -101,53 +99,53 @@ EOL
 mkdir -p /etc/pki/tls/certs
 mkdir -p /etc/pki/tls/private
 if [ ! -f /etc/pki/tls/certs/localhost.crt ] || [ ! -f /etc/pki/tls/private/localhost.key ]; then
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
 fi
 
 # Create the HTTPS virtual host configuration file with a dummy certificate
 cat <<EOL > "$HTTPS_CONFIG_FILE"
 <VirtualHost *:443>
-	ServerAdmin webmaster@$DOMAIN
-	ServerName $DOMAIN
-	ServerAlias www.$DOMAIN *.$DOMAIN
-	DocumentRoot $DOC_ROOT
-	ErrorLog $LOG_DIR/error.log
-	CustomLog $LOG_DIR/access.log combined
+    ServerAdmin webmaster@$DOMAIN
+    ServerName $DOMAIN
+    ServerAlias www.$DOMAIN *.$DOMAIN
+    DocumentRoot $DOC_ROOT
+    ErrorLog $LOG_DIR/error.log
+    CustomLog $LOG_DIR/access.log combined
 
-	# Dummy SSL configuration
-	SSLEngine on
-	SSLCertificateFile /etc/pki/tls/certs/localhost.crt
-	SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
-	SSLProtocol all -SSLv2 -SSLv3
+    # Dummy SSL configuration
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+    SSLProtocol all -SSLv2 -SSLv3
 
-	<FilesMatch \.php$>
-		SetHandler "proxy:unix:/run/php-fpm/$DOMAIN_BASE.sock|fcgi://localhost"
-	</FilesMatch>
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php-fpm/$DOMAIN_BASE.sock|fcgi://localhost"
+    </FilesMatch>
 
-	<Directory "$DOC_ROOT">
-		AllowOverride None
-		Require all granted
-	</Directory>
+    <Directory "$DOC_ROOT">
+        AllowOverride None
+        Require all granted
+    </Directory>
 </VirtualHost>
 EOL
 
 # Check if the configuration file already exists
 if [ ! -f "$DEFAULT_CONFIG_FILE" ]; then
-	# Create default virtual host to handle server IP requests
-	cat <<EOL > "$DEFAULT_CONFIG_FILE"
+    # Create default virtual host to handle server IP requests
+    cat <<EOL > "$DEFAULT_CONFIG_FILE"
 <VirtualHost *:80>
-	ServerAdmin webmaster@localhost
-	DocumentRoot /var/www/html
-	ServerName 127.0.0.1
-	ServerAlias localhost
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ServerName 127.0.0.1
+    ServerAlias localhost
 
-	ErrorLog /var/log/httpd/default_error.log
-	CustomLog /var/log/httpd/default_access.log combined
+    ErrorLog /var/log/httpd/default_error.log
+    CustomLog /var/log/httpd/default_access.log combined
 
-	<Directory "/var/www/html">
-		AllowOverride None
-		Require all granted
-	</Directory>
+    <Directory "/var/www/html">
+        AllowOverride None
+        Require all granted
+    </Directory>
 </VirtualHost>
 EOL
 fi
@@ -164,33 +162,33 @@ restorecon -R "$LOG_DIR"
 
 # Install and configure SSL if needed
 if [ "$SSL_ENABLED" = "yes" ]; then
-	# Install Certbot if not already installed
-	if ! command -v certbot &> /dev/null; then
-		echo "Certbot not found. Installing Certbot..."
-		dnf install -y epel-release
-		dnf install -y certbot python3-certbot-apache
-	fi
+    # Install Certbot if not already installed
+    if ! command -v certbot &> /dev/null; then
+        echo "Certbot not found. Installing Certbot..."
+        dnf install -y epel-release
+        dnf install -y certbot python3-certbot-apache
+    fi
 
-	# Obtain and install the SSL certificate
-	echo "Obtaining SSL certificate for $DOMAIN..."
-	certbot --apache -d $DOMAIN --non-interactive --agree-tos --email webmaster@$DOMAIN --no-redirect
+    # Obtain and install the SSL certificate
+    echo "Obtaining SSL certificate for $DOMAIN..."
+    certbot --apache -d $DOMAIN --non-interactive --agree-tos --email webmaster@$DOMAIN --no-redirect
 
-	if [ $? -eq 0 ]; then
-		echo "SSL certificate successfully installed for $DOMAIN."
-		# Reload Apache to apply SSL certificate
-		systemctl reload httpd
-	else
-		echo "Failed to obtain SSL certificate."
-		exit 1
-	fi
+    if [ $? -eq 0 ]; then
+        echo "SSL certificate successfully installed for $DOMAIN."
+        # Reload Apache to apply SSL certificate
+        systemctl reload httpd
+    else
+        echo "Failed to obtain SSL certificate."
+        exit 1
+    fi
 fi
 
 # Check Apache configuration and restart Apache
 apachectl configtest > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-	apachectl graceful
-	echo "Website: $DOMAIN has been created."
+    apachectl graceful
+    echo "Website: $DOMAIN has been created."
 else
-	echo "Apache configuration test failed."
-	exit 1
+    echo "Apache configuration test failed."
+    exit 1
 fi

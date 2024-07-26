@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Ensure exactly three arguments are provided
 if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <domain> --ssl <yes|no>"
     exit 1
@@ -33,7 +32,6 @@ else
     useradd -r -s /sbin/nologin --no-create-home $USER
 fi
 
-
 # Create the document root
 mkdir -p "$DOC_ROOT"
 chown -R "$USER:$USER" "$DOC_ROOT"
@@ -43,7 +41,6 @@ chmod -R 755 "$DOC_ROOT"
 semanage fcontext -a -t httpd_sys_rw_content_t "/home/$DOMAIN_BASE/public_html(/.*)?"
 restorecon -R "$DOC_ROOT"
 chcon -R -t httpd_sys_rw_content_t $DOC_ROOT
-
 
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
@@ -174,7 +171,7 @@ if [ "$SSL_ENABLED" = "yes" ]; then
 
     # Obtain and install the SSL certificate
     echo "Obtaining SSL certificate for $DOMAIN..."
-    certbot --apache -d $DOMAIN --non-interactive --agree-tos --email webmaster@$DOMAIN
+    certbot --apache -d $DOMAIN --non-interactive --agree-tos --email webmaster@$DOMAIN --no-redirect
 
     if [ $? -eq 0 ]; then
         echo "SSL certificate successfully installed for $DOMAIN."

@@ -101,6 +101,10 @@ LimitNOFILE=4096
 WantedBy=multi-user.target
 EOL
 
+sudo systemctl daemon-reload
+sudo systemctl start filebrowser
+sudo systemctl enable filebrowser
+
 # Print completion message
 printf "\n\nInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\n\n\n"
 printf "Your File Manager Link: http://$SERVER_IP:9999\n"

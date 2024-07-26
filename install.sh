@@ -102,11 +102,17 @@ WantedBy=multi-user.target
 EOL
 
 semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
+
 restorecon -R /usr/local/bin/filebrowser
+
 sudo dnf install policycoreutils-python-utils -y
+
 sudo semanage port -a -t http_port_t -p tcp 9999
+
 sudo systemctl daemon-reload
+
 sudo systemctl enable filebrowser
+
 sudo systemctl start filebrowser
 
 # Print completion message

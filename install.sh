@@ -83,7 +83,29 @@ sudo systemctl restart httpd
 # Get server IP address
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
-# Print completion message
-printf "\n\nInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\n\n"
-printf "You can check the PHP installation by visiting http://$SERVER_IP/info.php\n"
+curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 
+cat <<EOL > "/etc/systemd/system/filebrowser.service"
+[Unit]
+Description=File Browser
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/local/bin/filebrowser -a $SERVER_IP -r /home --database /var/lib/filebrowser/filebrowser.db -p 9999
+Restart=always
+RestartSec=5
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+# Print completion message
+printf "\n\nInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\n\n\n"
+printf "Your File Manager Link: http://$SERVER_IP:9999\n"
+printf "Your File Manager User: admin\n"
+printf "Your File Manager pass: admin\n\n\n"
+
+echo "Server Rebooting..."
+sudo reboot

@@ -38,9 +38,9 @@ chown -R "$USER:$USER" "$DOC_ROOT"
 chmod -R 755 "$DOC_ROOT"
 
 # Apply SELinux context to the document root
-semanage fcontext -a -t httpd_sys_rw_content_t "/home/$DOMAIN_BASE/public_html(/.*)?"
-restorecon -R "$DOC_ROOT"
-chcon -R -t httpd_sys_rw_content_t $DOC_ROOT
+semanage fcontext -a -t httpd_sys_rw_content_t "$DOC_ROOT(/.*)?" > /dev/null 2>&1
+restorecon -R "$DOC_ROOT" > /dev/null 2>&1
+chcon -R -t httpd_sys_rw_content_t "$DOC_ROOT" > /dev/null 2>&1
 
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
@@ -157,8 +157,8 @@ touch "$LOG_DIR/access.log"
 chown -R "$USER:$USER" "$LOG_DIR"
 
 # Apply SELinux context to the log directory
-semanage fcontext -a -t httpd_log_t "/var/log/httpd/$DOMAIN(/.*)?"
-restorecon -R "$LOG_DIR"
+semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?" > /dev/null 2>&1
+restorecon -R "$LOG_DIR" > /dev/null 2>&1
 
 # Install and configure SSL if needed
 if [ "$SSL_ENABLED" = "yes" ]; then

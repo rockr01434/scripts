@@ -20,7 +20,7 @@ DOC_ROOT="/home/$DOMAIN_BASE/public_html"
 HTTP_CONFIG_FILE="/etc/httpd/conf.d/$DOMAIN.conf"
 HTTPS_CONFIG_FILE="/etc/httpd/conf.d/${DOMAIN}_ssl.conf"
 LOG_DIR="/var/log/httpd/$DOMAIN"
-DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/default.conf"
+DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/000default.conf"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
 # Create a system user for the domain without creating a home directory

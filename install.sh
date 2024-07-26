@@ -61,6 +61,21 @@ chmod +x /usr/local/bin/CreateWebsite > /dev/null 2>&1
 wget -O /usr/local/bin/DeleteWebsite https://raw.githubusercontent.com/rockr01434/scripts/main/DeleteWebsite.sh > /dev/null 2>&1
 chmod +x /usr/local/bin/DeleteWebsite > /dev/null 2>&1
 
+
+# Path to the Apache main configuration file
+APACHE_CONF="/etc/httpd/conf/httpd.conf"
+
+# Backup the original configuration file
+cp "$APACHE_CONF" "$APACHE_CONF.bak"
+
+# Update or add ServerName directive
+if grep -q '^#.*ServerName' "$APACHE_CONF"; then
+    sed -i '/^#.*ServerName/s/^# *ServerName.*/ServerName localhost/' "$APACHE_CONF"
+elif ! grep -q '^ServerName ' "$APACHE_CONF"; then
+    echo "ServerName localhost" >> "$APACHE_CONF"
+fi
+
+
 # Restart Apache to apply changes
 echo "Restarting Apache..."
 sudo systemctl restart httpd
@@ -69,5 +84,6 @@ sudo systemctl restart httpd
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
 # Print completion message
-echo "Installation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured."
-echo "You can check the PHP installation by visiting http://$SERVER_IP/info.php"
+printf "\n\nInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\n\n"
+printf "You can check the PHP installation by visiting http://$SERVER_IP/info.php\n"
+

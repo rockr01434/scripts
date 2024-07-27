@@ -30,10 +30,10 @@ rm -rf "$LOG_DIR"
 
 # Remove the document root directory
 rm -rf "$DOC_ROOT"
-rm -rf "/home/$DOMAIN_BASE"
+rm -rf "/home/$DOMAIN"
 
 # Remove SELinux contexts
-semanage fcontext -d "/home/$DOMAIN_BASE/public_html(/.*)?"
+semanage fcontext -d "/home/$DOMAIN/public_html(/.*)?"
 semanage fcontext -d "/var/log/httpd/$DOMAIN(/.*)?"
 
 # Remove the system user

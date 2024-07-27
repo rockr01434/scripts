@@ -7,7 +7,7 @@ fi
 
 DOMAIN=$1
 DOMAIN_BASE=$(echo "$DOMAIN" | cut -d. -f1)
-DOC_ROOT="/home/$DOMAIN_BASE/public_html"
+DOC_ROOT="/home/$DOMAIN/public_html"
 HTTP_CONFIG_FILE="/etc/httpd/conf.d/$DOMAIN.conf"
 HTTPS_CONFIG_FILE="/etc/httpd/conf.d/${DOMAIN}_ssl.conf"
 LOG_DIR="/var/log/httpd/$DOMAIN"

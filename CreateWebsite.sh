@@ -66,6 +66,8 @@ cat <<EOL > "$DOC_ROOT/index.html"
 </html>
 EOL
 
+chown -R "apache:apache" "$DOC_ROOT/index.html"
+
 # Create the PHP-FPM pool configuration file
 cat <<EOL > "$PHP_FPM_POOL_FILE"
 [$DOMAIN_BASE]

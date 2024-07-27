@@ -25,17 +25,11 @@ PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
 # Create a system user for the domain without creating a home directory
 USER=$DOMAIN_BASE
-if id "$USER" &>/dev/null; then
-    # User exists
-    :
-else
-    useradd -r -s /sbin/nologin --no-create-home $USER
-fi
+
 
 # Create the document root
 mkdir -p "$DOC_ROOT"
-chown -R "$USER:$USER" "/home/$DOMAIN"
-chown -R "$USER:$USER" "$DOC_ROOT"
+chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
 # Apply SELinux context to the document root
@@ -45,13 +39,30 @@ chcon -R -t httpd_sys_rw_content_t "$DOC_ROOT" > /dev/null 2>&1
 
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
-<html>
-    <head>
-        <title>Welcome to $DOMAIN!</title>
-    </head>
-    <body>
-        <h1>Success! The $DOMAIN virtual host is working!</h1>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to $DOMAIN!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            margin-top: 50px;
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Success! The $DOMAIN is working!</h1>
+</body>
 </html>
 EOL
 
@@ -155,7 +166,7 @@ fi
 mkdir -p "$LOG_DIR"
 touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
-chown -R "$USER:$USER" "$LOG_DIR"
+chown -R "apache:apache" "$LOG_DIR"
 
 # Apply SELinux context to the log directory
 semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?" > /dev/null 2>&1

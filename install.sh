@@ -91,7 +91,7 @@ Description=File Browser
 After=network.target
 
 [Service]
-User=root
+User=apache
 ExecStart=/usr/local/bin/filebrowser -a $SERVER_IP -r /home --database /var/lib/filebrowser/filebrowser.db -p 9999
 Restart=always
 RestartSec=5
@@ -100,6 +100,9 @@ LimitNOFILE=4096
 [Install]
 WantedBy=multi-user.target
 EOL
+
+sudo chown apache:apache /usr/local/bin/filebrowser
+sudo chown -R apache:apache /var/lib/filebrowser
 
 semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
 

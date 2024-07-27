@@ -125,4 +125,4 @@ sudo systemctl start filebrowser
 printf "\n\n\033[0;32mInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\033[0m\n\n\n"
 printf "\033[0;32mYour File Manager Link: http://$SERVER_IP:9999\033[0m\n"
 printf "\033[0;32mYour File Manager User: admin\033[0m\n"
-printf "\033[0;32mYour File Manager pass: admin\033[0m\n\n\n"
+printf "\033[0;32mYour File Manager Pass: admin\033[0m\n\n\n"

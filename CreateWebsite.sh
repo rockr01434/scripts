@@ -34,6 +34,7 @@ fi
 
 # Create the document root
 mkdir -p "$DOC_ROOT"
+chown -R "$USER:$USER" "/home/$DOMAIN"
 chown -R "$USER:$USER" "$DOC_ROOT"
 chmod -R 755 "$DOC_ROOT"
 

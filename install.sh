@@ -111,6 +111,8 @@ sudo semanage port -a -t http_port_t -p tcp 9999
 
 sudo systemctl daemon-reload
 
+sudo mv /var/lib/filebrowser/filebrowser.db /var/lib/filebrowser/filebrowser.db.bak
+
 sudo systemctl enable filebrowser
 
 sudo systemctl start filebrowser

@@ -36,8 +36,6 @@ rm -rf "/home/$DOMAIN"
 semanage fcontext -d "/home/$DOMAIN/public_html(/.*)?"
 semanage fcontext -d "/var/log/httpd/$DOMAIN(/.*)?"
 
-# Remove the system user
-userdel -r $USER
 
 # Start Apache and PHP-FPM services
 systemctl start httpd

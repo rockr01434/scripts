@@ -58,10 +58,10 @@ EOL
 # Create the PHP-FPM pool configuration file
 cat <<EOL > "$PHP_FPM_POOL_FILE"
 [$DOMAIN_BASE]
-user = $USER
-group = $USER
+user = apache
+group = apache
 listen = /run/php-fpm/$DOMAIN_BASE.sock
-listen.owner = $USER
+listen.owner = apache
 listen.group = apache
 listen.mode = 0660
 pm = dynamic

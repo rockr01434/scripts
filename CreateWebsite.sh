@@ -16,26 +16,25 @@ if [ "$SSL_FLAG" != "--ssl" ] || { [ "$SSL_ENABLED" != "yes" ] && [ "$SSL_ENABLE
 fi
 
 DOMAIN_BASE=$(echo "$DOMAIN" | cut -d. -f1)
-DOC_ROOT="/home/$DOMAIN/public_html"  # Updated path
+DOC_ROOT="/home/$DOMAIN/public_html"
 HTTP_CONFIG_FILE="/etc/httpd/conf.d/$DOMAIN.conf"
 HTTPS_CONFIG_FILE="/etc/httpd/conf.d/${DOMAIN}_ssl.conf"
 LOG_DIR="/var/log/httpd/$DOMAIN"
 DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/000default.conf"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
-# Create a system user for the domain without creating a home directory
-USER=$DOMAIN_BASE
-
-
 # Create the document root
 mkdir -p "$DOC_ROOT"
 chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
-# Apply SELinux context to the document root
-semanage fcontext -a -t httpd_sys_rw_content_t "$DOC_ROOT(/.*)?" > /dev/null 2>&1
-restorecon -R "$DOC_ROOT" > /dev/null 2>&1
-chcon -R -t httpd_sys_rw_content_t "$DOC_ROOT" > /dev/null 2>&1
+# Apply SELinux context to the document root if not already set
+CURRENT_SELINUX_CONTEXT=$(ls -Z "$DOC_ROOT" | awk '{print $3}' | head -n 1)
+if [ "$CURRENT_SELINUX_CONTEXT" != "httpd_sys_rw_content_t" ]; then
+    semanage fcontext -a -t httpd_sys_rw_content_t "$DOC_ROOT(/.*)?"
+    restorecon -R "$DOC_ROOT"
+    chcon -R -t httpd_sys_rw_content_t "$DOC_ROOT"
+fi
 
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
@@ -78,10 +77,11 @@ listen.owner = apache
 listen.group = apache
 listen.mode = 0660
 pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
+pm.max_children = 50
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+pm.max_requests = 500
 chdir = /
 EOL
 
@@ -170,9 +170,12 @@ touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
 chown -R "apache:apache" "$LOG_DIR"
 
-# Apply SELinux context to the log directory
-semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?" > /dev/null 2>&1
-restorecon -R "$LOG_DIR" > /dev/null 2>&1
+# Apply SELinux context to the log directory if not already set
+CURRENT_LOG_SELINUX_CONTEXT=$(ls -Z "$LOG_DIR" | awk '{print $3}' | head -n 1)
+if [ "$CURRENT_LOG_SELINUX_CONTEXT" != "httpd_log_t" ]; then
+    semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?"
+    restorecon -R "$LOG_DIR"
+fi
 
 # Install and configure SSL if needed
 if [ "$SSL_ENABLED" = "yes" ]; then

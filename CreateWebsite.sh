@@ -29,11 +29,10 @@ chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
 
-#semanage fcontext -a -t httpd_sys_rw_content_t "/home/rock0x1.com/public_html(/.*)?"
-#restorecon -R -v "/home/rock0x1.com/public_html/"
-
-restorecon -RFv "$DOC_ROOT"
-
+if ! semanage fcontext -l | grep -F "/home/[^/]+/public_html(/.*)?" > /dev/null; then
+    semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
+fi
+restorecon -RFv "/home/" > /dev/null 2>&1
 
 
 # Create a simple index.html file
@@ -171,8 +170,11 @@ touch "$LOG_DIR/access.log"
 chown -R "apache:apache" "$LOG_DIR"
 
 
-#semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?"
-#restorecon -R "$LOG_DIR"
+
+if ! semanage fcontext -l | grep -F "/var/log/httpd/[^/]+/(/.*)?" > /dev/null; then
+    semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/httpd/[^/]+/(/.*)?"
+fi
+restorecon -RFv "/var/log/httpd/" > /dev/null 2>&1
 
 
 # Install and configure SSL if needed

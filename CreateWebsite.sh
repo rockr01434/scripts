@@ -29,6 +29,13 @@ chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
 
+#semanage fcontext -a -t httpd_sys_rw_content_t "/home/rock0x1.com/public_html(/.*)?"
+#restorecon -R -v "/home/rock0x1.com/public_html/"
+
+restorecon -RFv "$DOC_ROOT"
+
+
+
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
 <!DOCTYPE html>
@@ -162,6 +169,10 @@ mkdir -p "$LOG_DIR"
 touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
 chown -R "apache:apache" "$LOG_DIR"
+
+
+#semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?"
+#restorecon -R "$LOG_DIR"
 
 
 # Install and configure SSL if needed

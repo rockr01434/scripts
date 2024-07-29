@@ -28,13 +28,6 @@ mkdir -p "$DOC_ROOT"
 chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
-# Apply SELinux context to the document root if not already set
-CURRENT_SELINUX_CONTEXT=$(ls -Z "$DOC_ROOT" | awk '{print $3}' | head -n 1)
-if [ "$CURRENT_SELINUX_CONTEXT" != "httpd_sys_rw_content_t" ]; then
-    semanage fcontext -a -t httpd_sys_rw_content_t "$DOC_ROOT(/.*)?"
-    restorecon -R "$DOC_ROOT"
-    chcon -R -t httpd_sys_rw_content_t "$DOC_ROOT"
-fi
 
 # Create a simple index.html file
 cat <<EOL > "$DOC_ROOT/index.html"
@@ -170,12 +163,6 @@ touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
 chown -R "apache:apache" "$LOG_DIR"
 
-# Apply SELinux context to the log directory if not already set
-CURRENT_LOG_SELINUX_CONTEXT=$(ls -Z "$LOG_DIR" | awk '{print $3}' | head -n 1)
-if [ "$CURRENT_LOG_SELINUX_CONTEXT" != "httpd_log_t" ]; then
-    semanage fcontext -a -t httpd_log_t "$LOG_DIR(/.*)?"
-    restorecon -R "$LOG_DIR"
-fi
 
 # Install and configure SSL if needed
 if [ "$SSL_ENABLED" = "yes" ]; then

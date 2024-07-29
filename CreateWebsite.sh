@@ -85,7 +85,7 @@ chdir = /
 EOL
 
 # Restart PHP-FPM service
-systemctl restart php-fpm
+systemctl reload php-fpm
 
 # Create the HTTP virtual host configuration file
 cat <<EOL > "$HTTP_CONFIG_FILE"

@@ -201,7 +201,6 @@ if [ "$SSL_ENABLED" = "yes" ]; then
 fi
 
 # Check Apache configuration and restart Apache
-apachectl configtest > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     apachectl graceful
     echo "Website: $DOMAIN has been created."

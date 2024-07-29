@@ -101,27 +101,25 @@ LimitNOFILE=4096
 WantedBy=multi-user.target
 EOL
 
-sudo chown apache:apache /usr/local/bin/filebrowser
+sudo mkdir -p /etc/filebrowser /var/lib/filebrowser
 sudo chown -R apache:apache /var/lib/filebrowser
+sudo chown apache:apache /usr/local/bin/filebrowser
 
-semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
 
-restorecon -R /usr/local/bin/filebrowser
+sudo semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
+sudo restorecon -R /usr/local/bin/filebrowser
 
 sudo dnf install policycoreutils-python-utils -y
-
 sudo semanage port -a -t http_port_t -p tcp 9999
 
-sudo systemctl daemon-reload
+mv /var/lib/filebrowser/filebrowser.db /var/lib/filebrowser/filebrowser.db.bak
 
-sudo mv /var/lib/filebrowser/filebrowser.db /var/lib/filebrowser/filebrowser.db.bak
+systemctl daemon-reload
+systemctl enable filebrowser
+systemctl start filebrowser
 
-sudo systemctl enable filebrowser
 
-sudo systemctl start filebrowser
 
-# Print completion message
-# Print completion message in green
 printf "\n\n\033[0;32mInstallation completed. Apache, PHP 7.4, Python 3, Certbot, and unzip have been installed and configured.\033[0m\n\n\n"
 printf "\033[0;32mYour File Manager Link: http://$SERVER_IP:9999\033[0m\n"
 printf "\033[0;32mYour File Manager User: admin\033[0m\n"

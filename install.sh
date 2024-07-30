@@ -16,7 +16,6 @@ echo "Installing Apache..."
 sudo dnf install httpd -y
 
 
-
 # Enable Remi repository
 echo "Enabling Remi repository..."
 sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y

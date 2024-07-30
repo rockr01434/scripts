@@ -23,19 +23,15 @@ LOG_DIR="/var/log/httpd/$DOMAIN"
 DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/000default.conf"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
-echo "$(date) - Script started"
 
-echo "$(date) - Creating document root"
 mkdir -p "$DOC_ROOT"
 
 
-echo "$(date) - Checking SELinux context"
 if ! semanage fcontext -l | grep -F "/home/[^/]+/public_html(/.*)?" > /dev/null; then
     semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
 fi
 restorecon -RFv "/home/" > /dev/null 2>&1
 
-echo "$(date) - Creating index.html"
 cat <<EOL > "$DOC_ROOT/index.html"
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +63,6 @@ EOL
 chown -R "apache:apache" "/home/$DOMAIN"
 chmod -R 755 "$DOC_ROOT"
 
-echo "$(date) - Creating PHP-FPM pool configuration"
 cat <<EOL > "$PHP_FPM_POOL_FILE"
 [$DOMAIN_BASE]
 user = apache
@@ -85,10 +80,8 @@ pm.max_requests = 500
 chdir = /
 EOL
 
-echo "$(date) - Restarting PHP-FPM"
-kill -USR2 $(cat /run/php-fpm/php-fpm.pid) > /dev/null 2>&1
+systemctl reload php-fpm > /dev/null 2>&1
 
-echo "$(date) - Creating HTTP virtual host configuration"
 cat <<EOL > "$HTTP_CONFIG_FILE"
 <VirtualHost *:80>
     ServerAdmin webmaster@$DOMAIN
@@ -109,14 +102,12 @@ cat <<EOL > "$HTTP_CONFIG_FILE"
 </VirtualHost>
 EOL
 
-echo "$(date) - Generating dummy SSL certificates"
 mkdir -p /etc/pki/tls/certs
 mkdir -p /etc/pki/tls/private
 if [ ! -f /etc/pki/tls/certs/localhost.crt ] || [ ! -f /etc/pki/tls/private/localhost.key ]; then
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
 fi
 
-echo "$(date) - Creating HTTPS virtual host configuration"
 cat <<EOL > "$HTTPS_CONFIG_FILE"
 <VirtualHost *:443>
     ServerAdmin webmaster@$DOMAIN
@@ -140,7 +131,6 @@ cat <<EOL > "$HTTPS_CONFIG_FILE"
 </VirtualHost>
 EOL
 
-echo "$(date) - Creating default virtual host if necessary"
 if [ ! -f "$DEFAULT_CONFIG_FILE" ]; then
     cat <<EOL > "$DEFAULT_CONFIG_FILE"
 <VirtualHost *:80>
@@ -160,7 +150,6 @@ if [ ! -f "$DEFAULT_CONFIG_FILE" ]; then
 EOL
 fi
 
-echo "$(date) - Creating log directory and files"
 mkdir -p "$LOG_DIR"
 touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
@@ -169,23 +158,18 @@ touch "$LOG_DIR/ssl_access.log"
 chown -R "apache:apache" "$LOG_DIR"
 chmod -R 755 "$LOG_DIR"
 
-echo "$(date) - Checking SELinux context for log directory"
 if ! semanage fcontext -l | grep -F "/var/log/httpd/[^/]+/(/.*)?" > /dev/null; then
     semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/httpd/[^/]+/(/.*)?"
 fi
 restorecon -RFv "/var/log/httpd/" > /dev/null 2>&1
 
-echo "$(date) - Installing and configuring SSL if needed"
 if [ "$SSL_ENABLED" = "yes" ]; then
     systemctl enable --now httpd > /dev/null 2>&1
     if ! systemctl is-active --quiet httpd; then
-        echo "$(date) - Apache failed to start"
         exit 1
     fi
 fi
 
-echo "$(date) - Checking Apache configuration and restarting"
 systemctl reload httpd > /dev/null 2>&1
 
 echo "Website: $DOMAIN has been created."
-echo "$(date) - Script finished"

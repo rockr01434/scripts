@@ -23,9 +23,7 @@ LOG_DIR="/var/log/httpd/$DOMAIN"
 DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/000default.conf"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
-
 mkdir -p "$DOC_ROOT"
-
 
 if ! semanage fcontext -l | grep -F "/home/[^/]+/public_html(/.*)?" > /dev/null; then
     semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
@@ -96,7 +94,7 @@ cat <<EOL > "$HTTP_CONFIG_FILE"
     </FilesMatch>
 
     <Directory "$DOC_ROOT">
-        AllowOverride None
+        AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>
@@ -125,7 +123,7 @@ cat <<EOL > "$HTTPS_CONFIG_FILE"
     </FilesMatch>
 
     <Directory "$DOC_ROOT">
-        AllowOverride None
+        AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>

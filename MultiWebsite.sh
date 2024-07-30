@@ -98,7 +98,7 @@ EOL
     </FilesMatch>
 
     <Directory "$DOC_ROOT">
-        AllowOverride None
+        AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>
@@ -128,7 +128,7 @@ EOL
     </FilesMatch>
 
     <Directory "$DOC_ROOT">
-        AllowOverride None
+        AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>

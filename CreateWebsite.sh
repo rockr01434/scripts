@@ -23,19 +23,19 @@ LOG_DIR="/var/log/httpd/$DOMAIN"
 DEFAULT_CONFIG_FILE="/etc/httpd/conf.d/000default.conf"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
 
-# Create the document root
+echo "$(date) - Script started"
+
+echo "$(date) - Creating document root"
 mkdir -p "$DOC_ROOT"
-chown -R "apache:apache" "/home/$DOMAIN"
-chmod -R 755 "$DOC_ROOT"
 
 
+echo "$(date) - Checking SELinux context"
 if ! semanage fcontext -l | grep -F "/home/[^/]+/public_html(/.*)?" > /dev/null; then
     semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
 fi
 restorecon -RFv "/home/" > /dev/null 2>&1
 
-
-# Create a simple index.html file
+echo "$(date) - Creating index.html"
 cat <<EOL > "$DOC_ROOT/index.html"
 <!DOCTYPE html>
 <html lang="en">
@@ -64,9 +64,10 @@ cat <<EOL > "$DOC_ROOT/index.html"
 </html>
 EOL
 
-chown -R "apache:apache" "$DOC_ROOT/index.html"
+chown -R "apache:apache" "/home/$DOMAIN"
+chmod -R 755 "$DOC_ROOT"
 
-# Create the PHP-FPM pool configuration file
+echo "$(date) - Creating PHP-FPM pool configuration"
 cat <<EOL > "$PHP_FPM_POOL_FILE"
 [$DOMAIN_BASE]
 user = apache
@@ -84,10 +85,10 @@ pm.max_requests = 500
 chdir = /
 EOL
 
-# Restart PHP-FPM service
-systemctl reload php-fpm
+echo "$(date) - Restarting PHP-FPM"
+kill -USR2 $(cat /run/php-fpm/php-fpm.pid) > /dev/null 2>&1
 
-# Create the HTTP virtual host configuration file
+echo "$(date) - Creating HTTP virtual host configuration"
 cat <<EOL > "$HTTP_CONFIG_FILE"
 <VirtualHost *:80>
     ServerAdmin webmaster@$DOMAIN
@@ -108,28 +109,25 @@ cat <<EOL > "$HTTP_CONFIG_FILE"
 </VirtualHost>
 EOL
 
-# Generate dummy SSL certificates if SSL is enabled
+echo "$(date) - Generating dummy SSL certificates"
 mkdir -p /etc/pki/tls/certs
 mkdir -p /etc/pki/tls/private
 if [ ! -f /etc/pki/tls/certs/localhost.crt ] || [ ! -f /etc/pki/tls/private/localhost.key ]; then
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
 fi
 
-# Create the HTTPS virtual host configuration file with a dummy certificate
+echo "$(date) - Creating HTTPS virtual host configuration"
 cat <<EOL > "$HTTPS_CONFIG_FILE"
 <VirtualHost *:443>
     ServerAdmin webmaster@$DOMAIN
     ServerName $DOMAIN
     ServerAlias www.$DOMAIN *.$DOMAIN
     DocumentRoot $DOC_ROOT
-    ErrorLog $LOG_DIR/error.log
-    CustomLog $LOG_DIR/access.log combined
-
-    # Dummy SSL configuration
+    ErrorLog $LOG_DIR/ssl_error.log
+    CustomLog $LOG_DIR/ssl_access.log combined
     SSLEngine on
     SSLCertificateFile /etc/pki/tls/certs/localhost.crt
     SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
-    SSLProtocol all -SSLv2 -SSLv3
 
     <FilesMatch \.php$>
         SetHandler "proxy:unix:/run/php-fpm/$DOMAIN_BASE.sock|fcgi://localhost"
@@ -142,69 +140,52 @@ cat <<EOL > "$HTTPS_CONFIG_FILE"
 </VirtualHost>
 EOL
 
-# Check if the configuration file already exists
+echo "$(date) - Creating default virtual host if necessary"
 if [ ! -f "$DEFAULT_CONFIG_FILE" ]; then
-    # Create default virtual host to handle server IP requests
     cat <<EOL > "$DEFAULT_CONFIG_FILE"
 <VirtualHost *:80>
-    ServerAdmin webmaster@localhost
     DocumentRoot /var/www/html
-    ServerName 127.0.0.1
-    ServerAlias localhost
-
     ErrorLog /var/log/httpd/default_error.log
     CustomLog /var/log/httpd/default_access.log combined
+</VirtualHost>
 
-    <Directory "/var/www/html">
-        AllowOverride None
-        Require all granted
-    </Directory>
+<VirtualHost *:443>
+    DocumentRoot /var/www/html
+    ErrorLog /var/log/httpd/default_ssl_error.log
+    CustomLog /var/log/httpd/default_ssl_access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
 </VirtualHost>
 EOL
 fi
 
-# Create log directory and files
+echo "$(date) - Creating log directory and files"
 mkdir -p "$LOG_DIR"
 touch "$LOG_DIR/error.log"
 touch "$LOG_DIR/access.log"
+touch "$LOG_DIR/ssl_error.log"
+touch "$LOG_DIR/ssl_access.log"
 chown -R "apache:apache" "$LOG_DIR"
+chmod -R 755 "$LOG_DIR"
 
-
-
+echo "$(date) - Checking SELinux context for log directory"
 if ! semanage fcontext -l | grep -F "/var/log/httpd/[^/]+/(/.*)?" > /dev/null; then
     semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/httpd/[^/]+/(/.*)?"
 fi
 restorecon -RFv "/var/log/httpd/" > /dev/null 2>&1
 
-
-# Install and configure SSL if needed
+echo "$(date) - Installing and configuring SSL if needed"
 if [ "$SSL_ENABLED" = "yes" ]; then
-    # Install Certbot if not already installed
-    if ! command -v certbot &> /dev/null; then
-        echo "Certbot not found. Installing Certbot..."
-        dnf install -y epel-release
-        dnf install -y certbot python3-certbot-apache
-    fi
-
-    # Obtain and install the SSL certificate
-    echo "Obtaining SSL certificate for $DOMAIN..."
-    certbot --apache -d $DOMAIN --non-interactive --agree-tos --email webmaster@$DOMAIN --no-redirect
-
-    if [ $? -eq 0 ]; then
-        echo "SSL certificate successfully installed for $DOMAIN."
-        # Reload Apache to apply SSL certificate
-        systemctl reload httpd
-    else
-        echo "Failed to obtain SSL certificate."
+    systemctl enable --now httpd > /dev/null 2>&1
+    if ! systemctl is-active --quiet httpd; then
+        echo "$(date) - Apache failed to start"
         exit 1
     fi
 fi
 
-# Check Apache configuration and restart Apache
-if [ $? -eq 0 ]; then
-    apachectl graceful
-    echo "Website: $DOMAIN has been created."
-else
-    echo "Apache configuration test failed."
-    exit 1
-fi
+echo "$(date) - Checking Apache configuration and restarting"
+systemctl reload httpd > /dev/null 2>&1
+
+echo "Website: $DOMAIN has been created."
+echo "$(date) - Script finished"

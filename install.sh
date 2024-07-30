@@ -61,6 +61,9 @@ chmod +x /usr/local/bin/CreateWebsite > /dev/null 2>&1
 wget -O /usr/local/bin/DeleteWebsite https://raw.githubusercontent.com/rockr01434/scripts/main/DeleteWebsite.sh > /dev/null 2>&1
 chmod +x /usr/local/bin/DeleteWebsite > /dev/null 2>&1
 
+wget -O /usr/local/bin/MultiWebsite https://raw.githubusercontent.com/rockr01434/scripts/main/MultiWebsite.sh > /dev/null 2>&1
+chmod +x /usr/local/bin/MultiWebsite > /dev/null 2>&1
+
 
 # Path to the Apache main configuration file
 APACHE_CONF="/etc/httpd/conf/httpd.conf"

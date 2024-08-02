@@ -173,9 +173,7 @@ EOL
     # Move temp files to final location only if everything is okay
     if [ -f "$HTTP_CONFIG_TEMP_FILE" ]; then
         mv "$HTTP_CONFIG_TEMP_FILE" "$HTTP_CONFIG_FILE"
-    fi
-    if [ "$SSL_ENABLED" = "yes" ] && [ -f "$HTTPS_CONFIG_TEMP_FILE" ]; then
-        mv "$HTTPS_CONFIG_TEMP_FILE" "$HTTPS_CONFIG_FILE"
+		mv "$HTTPS_CONFIG_TEMP_FILE" "$HTTPS_CONFIG_FILE"
     fi
 done
 

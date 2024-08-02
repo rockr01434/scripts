@@ -16,6 +16,7 @@ echo "Installing Apache..."
 sudo dnf install httpd -y
 
 
+
 # Enable Remi repository
 echo "Enabling Remi repository..."
 sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y
@@ -75,6 +76,40 @@ if grep -q '^#.*ServerName' "$APACHE_CONF"; then
     sed -i '/^#.*ServerName/s/^# *ServerName.*/ServerName localhost/' "$APACHE_CONF"
 elif ! grep -q '^ServerName ' "$APACHE_CONF"; then
     echo "ServerName localhost" >> "$APACHE_CONF"
+fi
+
+# Add MPM Event Module Configuration
+MPM_CONF="/etc/httpd/conf.modules.d/00-mpm.conf"
+MPM_EVENT_CONF="/etc/httpd/conf.modules.d/mpm_event.conf"
+
+# Check and add settings to 00-mpm.conf
+if ! grep -q "<IfModule mpm_event_module>" "$MPM_CONF"; then
+    cat <<EOL >> "$MPM_CONF"
+<IfModule mpm_event_module>
+    StartServers             5
+    MinSpareThreads          50
+    MaxSpareThreads          150
+    ThreadLimit              128
+    ThreadsPerChild          50
+    MaxRequestWorkers        800
+    MaxConnectionsPerChild   2000
+</IfModule>
+EOL
+fi
+
+# Check and add settings to mpm_event.conf
+if ! grep -q "<IfModule mpm_event_module>" "$MPM_EVENT_CONF"; then
+    cat <<EOL >> "$MPM_EVENT_CONF"
+<IfModule mpm_event_module>
+    StartServers             5
+    MinSpareThreads          50
+    MaxSpareThreads          150
+    ThreadLimit              128
+    ThreadsPerChild          50
+    MaxRequestWorkers        800
+    MaxConnectionsPerChild   2000
+</IfModule>
+EOL
 fi
 
 

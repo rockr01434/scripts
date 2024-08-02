@@ -22,7 +22,11 @@ while true; do
     if [ -z "$DOMAIN" ]; then
         break
     fi
-    DOMAIN_LIST+=("$DOMAIN")
+    # Remove leading/trailing spaces and tabs
+    DOMAIN=$(echo "$DOMAIN" | xargs)
+    if [ -n "$DOMAIN" ]; then
+        DOMAIN_LIST+=("$DOMAIN")
+    fi
 done
 
 for DOMAIN in "${DOMAIN_LIST[@]}"; do
@@ -64,7 +68,7 @@ for DOMAIN in "${DOMAIN_LIST[@]}"; do
 </html>
 EOL
 
-    chown -R "apache:apache" "/home/$DOMAIN"
+    chown -R "apache:apache" "$DOC_ROOT"
     chmod -R 755 "$DOC_ROOT"
 
     cat <<EOL > "$PHP_FPM_POOL_FILE"
@@ -84,7 +88,8 @@ pm.max_requests = 500
 chdir = /
 EOL
 
-    cat <<EOL > "$HTTP_CONFIG_FILE"
+    HTTP_CONFIG_TEMP_FILE="${HTTP_CONFIG_FILE}.tmp"
+    cat <<EOL > "$HTTP_CONFIG_TEMP_FILE"
 <VirtualHost *:80>
     ServerAdmin webmaster@$DOMAIN
     ServerName $DOMAIN
@@ -111,7 +116,8 @@ EOL
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
         fi
 
-        cat <<EOL > "$HTTPS_CONFIG_FILE"
+        HTTPS_CONFIG_TEMP_FILE="${HTTPS_CONFIG_FILE}.tmp"
+        cat <<EOL > "$HTTPS_CONFIG_TEMP_FILE"
 <VirtualHost *:443>
     ServerAdmin webmaster@$DOMAIN
     ServerName $DOMAIN
@@ -163,20 +169,29 @@ EOL
     chmod -R 755 "$LOG_DIR"
 
     echo "Website: $DOMAIN has been created."
+
+    # Move temp files to final location only if everything is okay
+    if [ -f "$HTTP_CONFIG_TEMP_FILE" ]; then
+        mv "$HTTP_CONFIG_TEMP_FILE" "$HTTP_CONFIG_FILE"
+    fi
+    if [ "$SSL_ENABLED" = "yes" ] && [ -f "$HTTPS_CONFIG_TEMP_FILE" ]; then
+        mv "$HTTPS_CONFIG_TEMP_FILE" "$HTTPS_CONFIG_FILE"
+    fi
 done
 
 
+
 if ! semanage fcontext -l | grep -F "/home/[^/]+/public_html(/.*)?" > /dev/null; then
-	semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
+    semanage fcontext -a -t httpd_sys_rw_content_t "/home/[^/]+/public_html(/.*)?"
 fi
 restorecon -RFv "/home/" > /dev/null 2>&1
 
 if ! semanage fcontext -l | grep -F "/var/log/httpd/[^/]+/(/.*)?" > /dev/null; then
-	semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/httpd/[^/]+/(/.*)?"
+    semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/httpd/[^/]+/(/.*)?"
 fi
 restorecon -RFv "/var/log/httpd/" > /dev/null 2>&1
 
 systemctl reload php-fpm > /dev/null 2>&1
 systemctl reload httpd > /dev/null 2>&1
 
-echo "All websites have been created and services reloaded."
+echo "All websites have been created, MPM Event module settings applied, and services reloaded."

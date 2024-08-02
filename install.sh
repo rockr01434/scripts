@@ -112,7 +112,6 @@ if ! grep -q "<IfModule mpm_event_module>" "$MPM_EVENT_CONF"; then
 EOL
 fi
 
-
 # Restart Apache to apply changes
 echo "Restarting Apache..."
 sudo systemctl restart httpd

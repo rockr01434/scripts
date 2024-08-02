@@ -12,7 +12,6 @@ HTTP_CONFIG_FILE="/etc/httpd/conf.d/$DOMAIN.conf"
 HTTPS_CONFIG_FILE="/etc/httpd/conf.d/${DOMAIN}_ssl.conf"
 LOG_DIR="/var/log/httpd/$DOMAIN"
 PHP_FPM_POOL_FILE="/etc/php-fpm.d/$DOMAIN_BASE.conf"
-USER=$DOMAIN_BASE
 
 # Stop Apache and PHP-FPM services
 systemctl stop httpd
@@ -30,11 +29,6 @@ rm -rf "$LOG_DIR"
 
 # Remove the document root directory
 rm -rf "$DOC_ROOT"
-rm -rf "/home/$DOMAIN"
-
-# Remove SELinux contexts
-semanage fcontext -d "/home/$DOMAIN/public_html(/.*)?"
-semanage fcontext -d "/var/log/httpd/$DOMAIN(/.*)?"
 
 
 # Start Apache and PHP-FPM services

@@ -45,7 +45,7 @@ fi
 # Create OpenLiteSpeed configuration for PHP
 OLS_CONF="/usr/local/lsws/conf/httpd_config.conf"
 
-CONTENT='
+CONTENT="
 listener Default {
   address                 *:80
   secure                  0
@@ -58,7 +58,7 @@ listener SSL {
   certFile                $ssl_cert
   certChain               1
 }
-'
+"
 
 if [ -f "$OLS_CONF" ]; then
   sed -i '/listener Default{/,/}/d' "$OLS_CONF"

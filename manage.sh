@@ -80,9 +80,9 @@ EOF
     create_folder "${doc_root}"
     create_folder "${VHDIR}/${domain}"
 
-    # Create index.php if it doesn't exist
-    if [ ! -f "${doc_root}/index.php" ]; then
-        cat <<EOF > "${doc_root}/index.php"
+    # Create index.html if it doesn't exist
+    if [ ! -f "${doc_root}/index.html" ]; then
+        cat <<EOF > "${doc_root}/index.html"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,7 +109,7 @@ EOF
 </body>
 </html>
 EOF
-        change_owner "${doc_root}/index.php"
+        change_owner "${doc_root}/index.html"
     fi
 
     # Create Virtual Host Configuration if it doesn't exist

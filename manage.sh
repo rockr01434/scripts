@@ -213,7 +213,7 @@ EOF
 
             awk -v port="$port" -v domain="$domain" '
                 /address\s*\*:'"$port"'/ { in_block=1 }
-                in_block && /^\s*}/ { print "  map " domain " " domain " *." domain; in_block=0 }
+                in_block && /^\s*}/ { print "  map " domain " " domain ", *." domain; in_block=0 }
                 { print }
             ' "$WEBCF" > "$temp_file"
 

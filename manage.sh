@@ -189,7 +189,7 @@ context /.well-known/acme-challenge {
 vhssl  {
   keyFile                 $ssl_key
   certFile                $ssl_cert
-  certChain               0
+  certChain               1
   sslProtocol             24
   sslRenegProtection      1
   enableECDHE             1
@@ -213,7 +213,7 @@ EOF
 
             awk -v port="$port" -v domain="$domain" '
                 /address\s*\*:'"$port"'/ { in_block=1 }
-                in_block && /^\s*}/ { print "  map " domain " " domain; in_block=0 }
+                in_block && /^\s*}/ { print "  map " domain " " domain " *." domain; in_block=0 }
                 { print }
             ' "$WEBCF" > "$temp_file"
 

@@ -31,16 +31,15 @@ sudo systemctl start lsws
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
 
-local ssl_dir="/usr/local/lsws/conf/vhosts/Example"
-local ssl_key="${ssl_dir}/localhost.key"
-local ssl_cert="${ssl_dir}/localhost.crt"
+ssl_dir="/usr/local/lsws/conf/vhosts/Example"
+ssl_key="${ssl_dir}/localhost.key"
+ssl_cert="${ssl_dir}/localhost.crt"
 
 if [ ! -f "$ssl_key" ] || [ ! -f "$ssl_cert" ]; then
 	openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
-		-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=${domain}" \
+		-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost" \
 		-keyout "$ssl_key" -out "$ssl_cert" > /dev/null 2>&1
-	change_owner "$ssl_key"
-	change_owner "$ssl_cert"
+	chown -R lsadm:lsadm /usr/local/lsws/
 fi
 
 # Create OpenLiteSpeed configuration for PHP

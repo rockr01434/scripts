@@ -27,6 +27,22 @@ echo "Enabling and starting OpenLiteSpeed..."
 sudo systemctl enable lsws
 sudo systemctl start lsws
 
+# Get server IP address
+SERVER_IP=$(hostname -I | awk '{print $1}')
+
+
+local ssl_dir="/usr/local/lsws/conf/vhosts/Example"
+local ssl_key="${ssl_dir}/localhost.key"
+local ssl_cert="${ssl_dir}/localhost.crt"
+
+if [ ! -f "$ssl_key" ] || [ ! -f "$ssl_cert" ]; then
+	openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
+		-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=${domain}" \
+		-keyout "$ssl_key" -out "$ssl_cert" > /dev/null 2>&1
+	change_owner "$ssl_key"
+	change_owner "$ssl_cert"
+fi
+
 # Create OpenLiteSpeed configuration for PHP
 OLS_CONF="/usr/local/lsws/conf/httpd_config.conf"
 
@@ -39,6 +55,9 @@ listener Default {
 listener SSL {
   address                 *:443
   secure                  1
+  keyFile                 $ssl_key
+  certFile                $ssl_cert
+  certChain               1
 }
 '
 
@@ -66,9 +85,6 @@ sudo yum install certbot python3-certbot-nginx -y
 wget -O /usr/local/bin/star https://raw.githubusercontent.com/rockr01434/scripts/main/manage.sh > /dev/null 2>&1
 chmod +x /usr/local/bin/star > /dev/null 2>&1
 
-
-# Get server IP address
-SERVER_IP=$(hostname -I | awk '{print $1}')
 
 # Install File Browser
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash

@@ -23,7 +23,7 @@ sudo yum install openlitespeed lsphp73 lsphp73-common lsphp73-opcache lsphp73-mb
 
 yum groupinstall "Development Tools" -y
 yum install libzip libzip-devel pcre2-devel -y
-sudo /usr/local/lsws/lsphp73/bin/pecl install zip
+sudo /usr/local/lsws/lsphp73/bin/pecl install gd mbstring json curl zip
 sudo pkill lsphp
 
 

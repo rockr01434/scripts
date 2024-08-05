@@ -19,7 +19,8 @@ sudo yum install openlitespeed -y
 
 # Install OpenLiteSpeed and PHP
 echo "Installing OpenLiteSpeed and PHP..."
-sudo yum install openlitespeed lsphp73 lsphp73-common lsphp73-opcache lsphp73-mbstring lsphp73-xml lsphp73-gd lsphp73-curl lsphp73-intl lsphp73-soap lsphp73-xmlrpc lsphp73-ldap lsphp73-bcmath lsphp73-pear lsphp73-devel lsphp73-json lsphp73-zip -y
+sudo yum install openlitespeed lsphp73 lsphp73-common lsphp73-opcache lsphp73-mbstring lsphp73-xml lsphp73-gd lsphp73-curl lsphp73-intl lsphp73-soap lsphp73-xmlrpc lsphp73-ldap lsphp73-bcmath lsphp73-pear lsphp73-devel lsphp73-json lsphp73-zip lsphp73-imap lsphp73-mcrypt lsphp73-iconv lsphp73-gettext lsphp73-ftp -y
+
 
 
 # Enable and start OpenLiteSpeed

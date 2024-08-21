@@ -91,7 +91,18 @@ chmod +x /usr/local/bin/star > /dev/null 2>&1
 
 
 # Install File Browser
-curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+wget -qO- https://github.com/hostinger/filebrowser/releases/download/v2.26.0-h1/filebrowser-v2.26.0-h1.tar.gz | tar -xzf -
+sudo mv filebrowser-v2.26.0-h1 /usr/local/bin/filebrowser
+sudo chmod +x /usr/local/bin/filebrowser
+sudo chown nobody:nobody /usr/local/bin/filebrowser
+sudo mkdir -p /etc/filebrowser /var/lib/filebrowser
+filebrowser -d /var/lib/filebrowser/filebrowser.db config init
+filebrowser -d /var/lib/filebrowser/filebrowser.db config set -a $SERVER_IP -p 9999
+filebrowser -d /var/lib/filebrowser/filebrowser.db config set --trashDir .trash --viewMode list --sorting.by name --root /home --hidden-files .trash
+filebrowser -d /var/lib/filebrowser/filebrowser.db config set --disable-exec --branding.disableUsedPercentage --branding.disableExternal --perm.share=false --perm.execute=false --disable-type-detection-by-header --disable-preview-resize --disable-thumbnails
+filebrowser -d /var/lib/filebrowser/filebrowser.db users add admin admin
+sudo chown -R nobody:nobody /var/lib/filebrowser
+
 
 # Configure File Browser service
 cat <<EOL > "/etc/systemd/system/filebrowser.service"
@@ -101,7 +112,7 @@ After=network.target
 
 [Service]
 User=nobody
-ExecStart=/usr/local/bin/filebrowser -a $SERVER_IP -r /home --database /var/lib/filebrowser/filebrowser.db -p 9999
+ExecStart=/usr/local/bin/filebrowser -d /var/lib/filebrowser/filebrowser.db
 Restart=always
 RestartSec=5
 LimitNOFILE=4096
@@ -110,9 +121,7 @@ LimitNOFILE=4096
 WantedBy=multi-user.target
 EOL
 
-sudo mkdir -p /etc/filebrowser /var/lib/filebrowser
-sudo chown -R nobody:nobody /var/lib/filebrowser
-sudo chown nobody:nobody /usr/local/bin/filebrowser
+
 
 sudo semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
 sudo restorecon -R /usr/local/bin/filebrowser
@@ -120,7 +129,6 @@ sudo restorecon -R /usr/local/bin/filebrowser
 sudo yum install policycoreutils-python-utils -y
 sudo semanage port -a -t http_port_t -p tcp 9999
 
-mv /var/lib/filebrowser/filebrowser.db /var/lib/filebrowser/filebrowser.db.bak
 
 sudo systemctl daemon-reload
 sudo systemctl enable filebrowser

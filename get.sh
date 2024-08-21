@@ -99,7 +99,7 @@ sudo mkdir -p /etc/filebrowser /var/lib/filebrowser
 filebrowser -d /var/lib/filebrowser/filebrowser.db config init
 filebrowser -d /var/lib/filebrowser/filebrowser.db config set -a $SERVER_IP -p 9999
 filebrowser -d /var/lib/filebrowser/filebrowser.db config set --trashDir .trash --viewMode list --sorting.by name --root /home --hidden-files .trash
-filebrowser -d /var/lib/filebrowser/filebrowser.db config set --disable-exec --branding.disableUsedPercentage --branding.disableExternal --perm.share=false --perm.execute=false --disable-type-detection-by-header --disable-preview-resize --disable-thumbnails
+filebrowser -d /var/lib/filebrowser/filebrowser.db config set --disable-exec --branding.disableUsedPercentage --branding.disableExternal --perm.share=false --perm.execute=false
 filebrowser -d /var/lib/filebrowser/filebrowser.db users add admin admin
 sudo chown -R nobody:nobody /var/lib/filebrowser
 

@@ -149,8 +149,8 @@ add                     lsapi:lsphp73 php
 extprocessor lsphp73 {
 type                    lsapi
 address                 uds://tmp/lshttpd/${domain}.sock
-maxConns                10
-env                     LSAPI_CHILDREN=10
+maxConns                20
+env                     LSAPI_CHILDREN=20
 initTimeout             120
 retryTimeout            0
 persistConn             1

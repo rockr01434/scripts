@@ -191,7 +191,6 @@ vhssl  {
   certFile                $ssl_cert
   certChain               1
   sslProtocol             24
-  sslRenegProtection      1
   enableECDHE             1
   enableDHE               1
   sslSessionCache         1

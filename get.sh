@@ -63,6 +63,14 @@ listener SSL {
   certFile                $ssl_cert
   certChain               1
 }
+
+# Global settings - unlimited traffic for any proxy/CDN
+throttleLimit           0
+connTimeout             600
+keepAliveTimeout        60
+maxKeepAliveReq         1000
+smartKeepAlive          1
+enableIpGeo             0
 "
 
 if [ -f "$OLS_CONF" ]; then
@@ -72,6 +80,36 @@ if [ -f "$OLS_CONF" ]; then
   echo "$CONTENT" >> "$OLS_CONF"
   echo "Listener ports 80 & 443 added to $OLS_CONF"
 fi
+
+# Add system-level optimizations for unlimited traffic
+echo "Configuring system limits for high traffic..."
+cat >> /etc/security/limits.conf << 'EOF'
+# High traffic optimizations
+* soft nofile 1048576
+* hard nofile 1048576
+nobody soft nofile 1048576
+nobody hard nofile 1048576
+lsadm soft nofile 1048576
+lsadm hard nofile 1048576
+EOF
+
+# Kernel optimization for unlimited connections
+cat >> /etc/sysctl.conf << 'EOF'
+# Network optimizations for unlimited traffic
+fs.file-max = 10485760
+net.core.somaxconn = 262144
+net.ipv4.tcp_max_syn_backlog = 262144
+net.netfilter.nf_conntrack_max = 2097152
+net.ipv4.ip_local_port_range = 1024 65535
+net.ipv4.tcp_tw_reuse = 1
+net.core.netdev_max_backlog = 5000
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_intvl = 60
+net.ipv4.tcp_keepalive_probes = 10
+EOF
+
+# Apply sysctl changes
+sysctl -p
 
 chown -R lsadm:lsadm /usr/local/lsws/
 
@@ -91,7 +129,7 @@ chmod +x /usr/local/bin/star > /dev/null 2>&1
 
 
 # Install File Browser
-wget -qO- https://github.com/hostinger/filebrowser/releases/download/v2.26.0-h1/filebrowser-v2.26.0-h1.tar.gz | tar -xzf -
+wget -qO- https://github.com/hostinger/filebrowser/releases/download/v2.32.0-h3/filebrowser-v2.32.0-h3.tar.gz | tar -xzf -
 sudo mv filebrowser-v2.26.0-h1 /usr/local/bin/filebrowser
 sudo chmod +x /usr/local/bin/filebrowser
 sudo chown nobody:nobody /usr/local/bin/filebrowser

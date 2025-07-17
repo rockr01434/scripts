@@ -136,7 +136,7 @@ chmod +x /usr/local/bin/star > /dev/null 2>&1
 
 # Install File Browser
 wget -qO- https://github.com/hostinger/filebrowser/releases/download/v2.32.0-h3/filebrowser-v2.32.0-h3.tar.gz | tar -xzf -
-sudo mv filebrowser-v2.26.0-h1 /usr/local/bin/filebrowser
+sudo mv filebrowser-v2.32.0-h3 /usr/local/bin/filebrowser
 sudo chmod +x /usr/local/bin/filebrowser
 sudo chown nobody:nobody /usr/local/bin/filebrowser
 sudo mkdir -p /etc/filebrowser /var/lib/filebrowser

@@ -122,6 +122,16 @@ adminEmails               nobody@gmail.com
 enableGzip                1
 enableIpGeo               1
 
+# Unlimited traffic settings - no rate limiting
+throttleLimit           0
+perClientConnLimit      0
+dynReqPerSec            0
+staticReqPerSec         0
+outBandwidth            0
+inBandwidth             0
+connTimeout             600
+keepAliveTimeout        60
+
 errorlog \$VH_ROOT/logs/\$VH_NAME.error_log {
   useServer               0
   logLevel                WARN
@@ -148,11 +158,11 @@ add                     lsapi:lsphp73 php
 
 extprocessor lsphp73 {
 type                    lsapi
-address                 uds://tmp/lshttpd/${domain}.sock
-maxConns                20
-env                     LSAPI_CHILDREN=20
-initTimeout             120
-retryTimeout            0
+address                 uds://tmp/lshttpd/\${domain}.sock
+maxConns                500
+env                     LSAPI_CHILDREN=200
+initTimeout             600
+retryTimeout            600
 persistConn             1
 pcKeepAliveTimeout      1
 respBuffer              0
@@ -163,8 +173,8 @@ extUser                 nobody
 extGroup                nobody
 memSoftLimit            2047M
 memHardLimit            2047M
-procSoftLimit           400
-procHardLimit           500
+procSoftLimit           4000
+procHardLimit           5000
 }
 
 rewrite  {
@@ -310,4 +320,3 @@ while [ "$1" != "" ]; do
             ;;
     esac
 done
-

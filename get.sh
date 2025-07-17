@@ -87,42 +87,12 @@ if [ -f "$OLS_CONF" ]; then
   echo "Listener ports 80 & 443 added to $OLS_CONF"
 fi
 
-# Add system-level optimizations for unlimited traffic
-echo "Configuring system limits for high traffic..."
-cat >> /etc/security/limits.conf << 'EOF'
-# High traffic optimizations
-* soft nofile 1048576
-* hard nofile 1048576
-nobody soft nofile 1048576
-nobody hard nofile 1048576
-lsadm soft nofile 1048576
-lsadm hard nofile 1048576
-EOF
-
-# Kernel optimization for unlimited connections
-cat >> /etc/sysctl.conf << 'EOF'
-# Network optimizations for unlimited traffic
-fs.file-max = 10485760
-net.core.somaxconn = 262144
-net.ipv4.tcp_max_syn_backlog = 262144
-net.netfilter.nf_conntrack_max = 2097152
-net.ipv4.ip_local_port_range = 1024 65535
-net.ipv4.tcp_tw_reuse = 1
-net.core.netdev_max_backlog = 5000
-net.ipv4.tcp_keepalive_time = 600
-net.ipv4.tcp_keepalive_intvl = 60
-net.ipv4.tcp_keepalive_probes = 10
-EOF
-
-# Apply sysctl changes
-sysctl -p
 
 chown -R lsadm:lsadm /usr/local/lsws/
 
 # Enable and start OpenLiteSpeed
 echo "restarting OpenLiteSpeed..."
 sudo systemctl restart lsws
-
 
 
 # Install Certbot and the OpenLiteSpeed plugin for Certbot
@@ -164,8 +134,6 @@ LimitNOFILE=4096
 [Install]
 WantedBy=multi-user.target
 EOL
-
-
 
 sudo semanage fcontext -a -t bin_t "/usr/local/bin/filebrowser(/.*)?"
 sudo restorecon -R /usr/local/bin/filebrowser

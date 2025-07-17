@@ -104,6 +104,11 @@ wget -O /usr/local/bin/star https://raw.githubusercontent.com/rockr01434/scripts
 chmod +x /usr/local/bin/star > /dev/null 2>&1
 
 
+sudo systemctl stop iptables 2>/dev/null;
+sudo systemctl disable iptables 2>/dev/null;
+sudo yum remove iptables iptables-services -y && echo "iptables completely removed"
+
+
 # Install File Browser
 wget -qO- https://github.com/hostinger/filebrowser/releases/download/v2.32.0-h3/filebrowser-v2.32.0-h3.tar.gz | tar -xzf -
 sudo mv filebrowser-v2.32.0-h3 /usr/local/bin/filebrowser

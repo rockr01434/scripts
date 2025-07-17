@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Wait for cloud-init to finish if present (common on fresh VPS rebuilds)
+if command -v cloud-init >/dev/null 2>&1; then
+    echo "Waiting for cloud-init to complete..."
+    cloud-init status --wait || true
+fi
+
 # Import AlmaLinux GPG key
 sudo rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
 

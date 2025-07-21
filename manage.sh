@@ -153,10 +153,10 @@ indexFiles              index.php, index.html
 }
 
 scripthandler  {
-add                     lsapi:lsphp73 php
+add                     lsapi:lsphp74 php
 }
 
-extprocessor lsphp73 {
+extprocessor lsphp74 {
 type                    lsapi
 address                 uds://tmp/lshttpd/\${domain}.sock
 maxConns                500
@@ -167,7 +167,7 @@ persistConn             1
 pcKeepAliveTimeout      1
 respBuffer              0
 autoStart               1
-path                    /usr/local/lsws/lsphp73/bin/lsphp
+path                    /usr/local/lsws/lsphp74/bin/lsphp
 instances               1
 extUser                 nobody
 extGroup                nobody

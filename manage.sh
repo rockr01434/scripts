@@ -69,7 +69,7 @@ allowSymbolLink         1
 enableScript            1
 restrained              1
 
-ssl {
+vhssl {
 	enable              1
 	certFile            $ssl_cert
 	keyFile             $ssl_key

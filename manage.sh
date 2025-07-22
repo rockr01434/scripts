@@ -150,7 +150,7 @@ add                     lsapi:lsphp74 php
 
 extprocessor lsphp74 {
 type                    lsapi
-address                 uds://tmp/lshttpd/\${domain}.sock
+address                 uds://tmp/lshttpd/${domain}.sock
 maxConns                150
 env                     LSAPI_CHILDREN=15
 env                     LSAPI_AVOID_FORK=1

@@ -55,23 +55,7 @@ fi
 
 
 mkdir -p /usr/local/lsws/Example/html
-cat > /usr/local/lsws/Example/html/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Welcome to LiteSpeed Web Server</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        h1 { color: #333; }
-    </style>
-</head>
-<body>
-    <h1>Welcome to LiteSpeed Web Server!</h1>
-    <p>If you see this page, the web server is successfully installed and working.</p>
-</body>
-</html>
-EOF
-
+rm -rf /usr/local/lsws/Example/html/upload.php
 chown -R lsadm:lsadm /usr/local/lsws/Example/
 
 
@@ -112,6 +96,36 @@ if ! grep -q "map.*Example" "$OLS_CONF"; then
   sed -i '/listener SSL {/,/}/ {
     /}/ i\  map                     Example *
   }' "$OLS_CONF"
+fi
+
+
+# Add server tuning configuration
+TUNING_CONTENT='
+tuning  {
+  maxConnections          10000
+  maxSSLConnections       10000
+  connTimeout             300
+  maxKeepAliveReq         10000
+  keepAliveTimeout        5
+  sndBufSize              0
+  rcvBufSize              0
+  maxReqURLLen            32768
+  maxReqHeaderSize        65536
+  maxReqBodySize          2047M
+  maxDynRespHeaderSize    32768
+  maxDynRespSize          2047M
+  enableGzipCompress      1
+  enableDynGzipCompress   1
+  gzipCompressLevel       6
+  gzipAutoUpdateStatic    1
+  gzipStaticCompressLevel 6
+  brStaticCompressLevel   6
+  gzipMaxFileSize         10M
+  gzipMinFileSize         300
+}'
+
+if ! grep -q "tuning" "$OLS_CONF"; then
+  echo "$TUNING_CONTENT" >> "$OLS_CONF"
 fi
 
 

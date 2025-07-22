@@ -28,6 +28,15 @@ echo "Installing OpenLiteSpeed and PHP..."
 sudo yum install openlitespeed lsphp74 lsphp74-common lsphp74-opcache lsphp74-mbstring lsphp74-xml lsphp74-gd lsphp74-curl lsphp74-intl lsphp74-soap lsphp74-xmlrpc lsphp74-ldap lsphp74-bcmath lsphp74-pear lsphp74-devel lsphp74-json lsphp74-zip lsphp74-imap lsphp74-mcrypt lsphp74-iconv lsphp74-gettext lsphp74-ftp lsphp74-mysqlnd lsphp74-process lsphp74-pdo -y
 
 
+echo "Creating PHP symlinks..."
+mkdir -p /usr/local/lsws/fcgi-bin/
+ln -sf /usr/local/lsws/lsphp74/bin/lsphp /usr/local/lsws/fcgi-bin/lsphp74
+ln -sf /usr/local/lsws/lsphp74/bin/lsphp /usr/local/lsws/fcgi-bin/lsphp
+ln -sf /usr/local/lsws/lsphp74/bin/lsphp /usr/local/lsws/fcgi-bin/lsphp5
+chown -h lsadm:lsadm /usr/local/lsws/fcgi-bin/lsphp*
+chmod 755 /usr/local/lsws/fcgi-bin/
+
+
 yum groupinstall "Development Tools" -y
 yum install libzip libzip-devel pcre2-devel -y
 sudo /usr/local/lsws/lsphp74/bin/pecl install gd mbstring json curl zip

@@ -23,9 +23,15 @@ echo "Installing OpenLiteSpeed repository..."
 sudo wget -O - https://repo.litespeed.sh | sudo bash
 sudo yum install openlitespeed -y
 
-# Install OpenLiteSpeed and PHP
-echo "Installing OpenLiteSpeed and PHP..."
-sudo yum install openlitespeed lsphp74 lsphp74-common lsphp74-opcache lsphp74-mbstring lsphp74-xml lsphp74-gd lsphp74-curl lsphp74-intl lsphp74-soap lsphp74-xmlrpc lsphp74-ldap lsphp74-bcmath lsphp74-pear lsphp74-devel lsphp74-json lsphp74-zip lsphp74-imap lsphp74-mcrypt lsphp74-iconv lsphp74-gettext lsphp74-ftp lsphp74-mysqlnd lsphp74-process lsphp74-pdo -y
+echo "Installing OpenLiteSpeed and PHP 7.4 with all common extensions..."
+
+# Install OpenLiteSpeed and base PHP
+sudo yum install -y openlitespeed lsphp74 lsphp74-common lsphp74-opcache lsphp74-mysqlnd lsphp74-pdo
+sudo yum install -y lsphp74-mbstring lsphp74-xml lsphp74-gd lsphp74-curl lsphp74-json lsphp74-zip
+sudo yum install -y lsphp74-intl lsphp74-soap lsphp74-xmlrpc lsphp74-bcmath lsphp74-imap
+sudo yum install -y lsphp74-pear lsphp74-devel lsphp74-process lsphp74-ldap
+sudo yum install -y lsphp74-iconv lsphp74-gettext lsphp74-ftp lsphp74-tidy lsphp74-enchant lsphp74-pspell
+sudo yum install -y lsphp74-sqlite3 lsphp74-pgsql lsphp74-snmp lsphp74-sodium lsphp74-gmp
 
 
 echo "Creating PHP symlinks..."
@@ -39,7 +45,6 @@ chmod 755 /usr/local/lsws/fcgi-bin/
 
 yum groupinstall "Development Tools" -y
 yum install libzip libzip-devel pcre2-devel -y
-sudo /usr/local/lsws/lsphp74/bin/pecl install gd mbstring json curl zip
 sudo pkill lsphp
 
 

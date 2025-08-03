@@ -160,7 +160,7 @@ env                     LSAPI_MAX_REQUESTS=10000
 initTimeout             60
 retryTimeout            0
 persistConn             1
-pcKeepAliveTimeout      1
+pcKeepAliveTimeout      20
 respBuffer              0
 autoStart               2
 path                    /usr/local/lsws/lsphp74/bin/lsphp

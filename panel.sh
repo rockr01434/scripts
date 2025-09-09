@@ -1175,7 +1175,7 @@ chmod 777 "$PANEL_DIR/sessions"
 
 # Create systemd service
 echo -e "${YELLOW}Creating systemd service...${NC}"
-cat > /etc/systemd/system/panel.service << 'EOF'
+cat > /etc/systemd/system/panel.service << EOF
 [Unit]
 Description=Premium Control Panel
 After=network.target mysql.service
@@ -1183,8 +1183,8 @@ After=network.target mysql.service
 [Service]
 Type=simple
 User=nobody
-WorkingDirectory=/usr/local/panel
-ExecStart=/usr/local/lsws/lsphp74/bin/php -S 0.0.0.0:7868
+WorkingDirectory=$PANEL_DIR
+ExecStart=$PHP_BIN -S 0.0.0.0:$PANEL_PORT
 Restart=always
 RestartSec=10
 StandardOutput=journal

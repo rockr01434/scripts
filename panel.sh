@@ -35,8 +35,12 @@ if ! systemctl is-active --quiet mariadb; then
     systemctl enable mariadb >/dev/null 2>&1
 fi
 
-# Generate random MySQL password
-MYSQL_ROOT_PASS=$(openssl rand -base64 16 | tr -d "=+/" | cut -c1-16)
+# Check for existing MySQL password or generate new
+if [ -f "/root/.panel_credentials" ]; then
+    MYSQL_ROOT_PASS=$(grep "MySQL Root Password:" /root/.panel_credentials | cut -d':' -f2 | tr -d ' ')
+else
+    MYSQL_ROOT_PASS=$(openssl rand -base64 16 | tr -d "=+/" | cut -c1-16)
+fi
 
 # Secure MariaDB installation
 echo -e "${YELLOW}Securing MariaDB...${NC}"

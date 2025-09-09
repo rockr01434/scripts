@@ -31,7 +31,7 @@ sudo yum install -y lsphp74-mbstring lsphp74-xml lsphp74-gd lsphp74-curl lsphp74
 sudo yum install -y lsphp74-intl lsphp74-soap lsphp74-xmlrpc lsphp74-bcmath lsphp74-imap
 sudo yum install -y lsphp74-pear lsphp74-devel lsphp74-process lsphp74-ldap
 sudo yum install -y lsphp74-iconv lsphp74-gettext lsphp74-ftp lsphp74-tidy lsphp74-enchant lsphp74-pspell
-sudo yum install -y lsphp74-sqlite3 lsphp74-pgsql lsphp74-snmp lsphp74-sodium lsphp74-gmp
+sudo yum install -y lsphp74-sqlite3 lsphp74-pgsql lsphp74-snmp lsphp74-sodium lsphp74-gmp lsphp74-ssh2
 
 
 echo "Creating PHP symlinks..."
